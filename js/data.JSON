@@ -1,0 +1,17 @@
+{
+    "items" : [
+        {
+            "edit": false,
+            "caption": "Do laundry"
+        },
+        {
+            "edit": false,
+            "caption": "Do this too"
+        },
+        {
+            "edit": false,
+            "caption": "friends"
+        }
+    ]
+
+}

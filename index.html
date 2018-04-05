@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Prello: Project Manager</title>
+    <meta name="author" content="Prathmesh Patel" />
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">  
+     <!-- stop the web browser from ever caching this page or its images -->
+   
+    <link href='https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Material+Icons' rel="stylesheet">
+    <link href="https://unpkg.com/vuetify/dist/vuetify.min.css" rel="stylesheet">
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/vuetify/dist/vuetify.js"></script>
+
+    <link type="text/css" rel="stylesheet" href="css/style.css">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.10.1/firebase.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vuefire/1.4.5/vuefire.js"></script>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui"> 
+
+    
+</head>
+
+<body>
+ <div id="app" >
+   <v-app light>
+
+    <div id="colors" v-bind:style="{ backgroundColor: colors['0']['.value'] }">
+
+      <v-navigation-drawer temporary v-model="drawer" absolute>
+        <v-list class="pa-1">
+          <v-list-tile >
+            <v-list-tile-action>
+              <v-btn  @click="toggle()">
+                <v-icon right>lists</v-icon>
+              </v-btn>
+            </v-list-tile-action>
+          </v-list-tile>
+          <v-list-tile >
+            <v-list-tile-action>
+              <v-btn large @click="logout">Logout</v-btn>
+            </v-list-tile-action>
+          </v-list-tile>
+          <v-list-tile >
+            <v-list-tile-action>
+              <v-btn fab dark small color="blue" @click="changeColor('lightblue')"></v-btn>
+            </v-list-tile-action>
+          </v-list-tile>
+          <v-list-tile >
+            <v-list-tile-action>
+              <v-btn fab dark small color="red" @click="changeColor('lightpink')"></v-btn>
+            </v-list-tile-action>
+          </v-list-tile>
+          <v-list-tile>
+            <v-list-tile-action>
+              <v-btn fab dark small color="green" @click="changeColor('palegreen')"></v-btn>
+            </v-list-tile-action>
+          </v-list-tile>
+          <v-list-tile >
+            <v-list-tile-action>
+              <v-btn fab dark small color="yellow" @click="changeColor('lightyellow')"></v-btn>
+            </v-list-tile-action>
+          </v-list-tile>
+        </v-list>
+      </v-navigation-drawer>
+
+      <v-toolbar dense dark color="primary" >
+        <v-toolbar-side-icon @click.native.stop="drawer = !drawer" class="hidden-sm-and-up"></v-toolbar-side-icon>
+        <v-toolbar-title v-text="title"></v-toolbar-title>
+        <v-spacer></v-spacer>
+        <v-toolbar-items class="hidden-xs-only">
+          <v-btn fab dark small color="blue" @click="changeColor('lightblue')"></v-btn>
+          <v-btn fab dark small color="red" @click="changeColor('lightpink')"></v-btn>
+          <v-btn fab dark small color="green" @click="changeColor('palegreen')"></v-btn>
+          <v-btn fab dark small color="yellow" @click="changeColor('lightyellow')"></v-btn>
+          <v-spacer></v-spacer>
+          <v-btn dark small color="primary" @click="toggle()">
+            <v-icon right>lists</v-icon>
+          </v-btn>
+          <v-spacer></v-spacer>
+
+          <v-spacer></v-spacer>
+          <v-btn dark small color="primary" @click="logout()">Logout</v-btn>
+        </v-toolbar-items>
+      </v-toolbar>
+
+      <v-content>     
+      
+        <div class="modal" v-show="!enter">
+          <div class="center">
+            <!-- <v-layout align-center justify-center> -->
+              <v-layout row> 
+                <h2 class="intro">Register:</h2>
+              </v-layout>
+              <div class="add-item">
+                <form @submit.prevent="addUser()">
+                  <v-layout row>
+                <v-flex xs4>
+                  <v-subheader dark>Username</v-subheader>
+                </v-flex>
+                <v-flex xs8>
+                  <v-text-field dark
+                    name="input-10-1"
+                    label="Enter Name"
+                    hint="At least 1 characters"
+                    v-model="userName"
+                    min="1"
+                    
+                    counter
+                  ></v-text-field>
+                </v-flex>
+              </v-layout>
+                  <v-layout row>
+                <v-flex xs4>
+                  <v-subheader dark>Email</v-subheader>
+                </v-flex>
+                <v-flex xs8>
+                  <v-text-field dark
+                    name="input-10-1"
+                    label="Enter Email"
+                    hint="At least 1 characters"
+                    v-model="userEmail"
+                    min="1"
+                    
+                    counter
+                  ></v-text-field>
+                </v-flex>
+              </v-layout>
+                  <v-layout row>
+                    <v-btn type="submit" value="addUser">Register</v-btn>
+                  </v-layout>
+                </form>
+              </div>
+              <v-layout row>
+                <h2 class="intro">Login:</h2>
+              </v-layout>
+              <div class="add-item">
+                <form @submit.prevent="login()">
+                  <v-layout row>
+                <v-flex xs4>
+                  <v-subheader dark>Email</v-subheader>
+                </v-flex>
+                <v-flex xs8>
+                  <v-text-field dark
+                    name="input-10-1"
+                    label="Enter login email"
+                    hint="At least 1 characters"
+                    v-model="loginEmail"
+                    min="1"
+                    
+                    counter
+                  ></v-text-field>
+                </v-flex>
+              </v-layout>
+                  <v-layout row>
+                    <v-btn type="submit" value="Login">login</v-btn>
+                  </v-layout>
+                </form>
+              </div>
+              <!-- </v-layout> -->
+            </div>
+          </div>
+
+          <v-container> 
+            <h4>Username: {{current['2']['.value']}}</h4> 
+            <h4> Email: {{current['0']['.value']}}</h4>   
+            <form v-if="changingInfo" @submit.prevent="changeInfo()">
+              <v-layout justify-center>
+                    <v-flex xs12 sm10 md8 lg6>
+                      <v-card ref="form">
+                        <v-card-text>
+                          <v-text-field
+                            label="New Username"
+                            placeholder="PMoney"
+                            v-model="changeName"
+                            required
+                          ></v-text-field>
+                          <v-text-field
+                            label="New Email"
+                            placeholder="pmoney@duke.edu"
+                            v-model="changeEmail"
+                            required
+                          ></v-text-field>
+                        </v-card-text>
+                        <v-divider class="mt-5"></v-divider>
+                        <v-card-actions>
+                          <v-spacer></v-spacer>
+                          <v-btn type="reset" value="Cancel" @click="changeInfoDone()">Cancel</v-btn>
+                          <v-btn type="submit" value="Done">Done</v-btn>
+                        </v-card-actions>
+                      </v-card>
+                    </v-flex>
+                  </v-layout>
+                </form>
+            <v-btn v-else dark small color="primary" @click="changingInfo = true">Change Info
+          </v-btn>
+          </v-container>
+
+          <v-divider></v-divider>
+          <ul>
+            <v-container>
+              <div class="add-item">
+                  <form @submit.prevent="filterDate()">
+                     <v-flex xs12 sm10 md8 lg6>
+                      <v-card ref="form">
+                        <v-card-text>
+                          <v-text-field
+                            label="Filter Date:"
+                            placeholder="Type in a date in the format MM/DD/YYYY. But, use '1/1/2018' instead of '01/01/2018'."
+                            v-model="filterDateInput"
+                            required
+                            multi-line
+                          ></v-text-field>
+                        </v-card-text>
+                        <v-divider class="mt-5"></v-divider>
+                        <v-card-actions>
+                          <v-spacer></v-spacer>
+                          <v-btn type="reset" value="Cancel" @click="clearFilter()">Clear Filter</v-btn>
+                          <v-btn type="submit" value="Done">Done</v-btn>
+                        </v-card-actions>
+                      </v-card>
+                    </v-flex>
+                  </form>
+                  <v-btn v-else @click="addingList = true">Add List</v-btn>
+              </div>
+            </v-container> 
+            <v-divider></v-divider>
+            <v-container>
+                <div class="add-item">
+                    <form @submit.prevent="filterCategory()">
+                        <v-layout row>
+                            <h4>Filter by Category</h4></v-layout>
+                        <li class="side-list" v-for="cat in categories">
+                            <v-btn @click="filterCategory(cat)" class="white-label" v-bind:style="{ backgroundColor: cat.color }">{{cat.label}}</v-btn>
+                        </li>
+                    </form>
+                    <v-btn type="reset" value="Clear Filter" @click="clearFilter()">Clear Filter</v-btn>
+                </div>
+                <div class="add-item">
+                    <form v-if="addingCategory" @submit.prevent="addCategory()">
+                     <v-flex xs12 sm10 md8 lg6>
+                      <v-card ref="form">
+                        <v-card-text>
+                          <v-text-field
+                            label="Category Label"
+                            placeholder="Insert Label.."
+                            v-model="categoryLabel"
+                            required
+                            multi-line
+                          ></v-text-field>
+                          <v-text-field
+                            label="Category Color"
+                            placeholder="Insert Color.."
+                            v-model="categoryColor"
+                            required
+                            multi-line
+                          ></v-text-field>
+                        </v-card-text>
+                        <v-divider class="mt-5"></v-divider>
+                        <v-card-actions>
+                          <v-spacer></v-spacer>
+                          <v-btn type="reset" value="Cancel" @click="addCategoryDone()">Cancel</v-btn>
+                          <v-btn type="submit" value="Done">Done</v-btn>
+                        </v-card-actions>
+                      </v-card>
+                    </v-flex>
+                  </form>
+                    <v-btn v-else @click="addingCategory = true">Add Category</v-btn>
+                </div>
+            </v-container>
+          <div>
+            <form v-if="addingList" @submit.prevent="addList()">
+              <v-layout row>
+                <v-flex xs4>
+                  <v-subheader>New List Title</v-subheader>
+                </v-flex>
+                <v-flex xs8>
+                  <v-text-field
+                    name="input-10-1"
+                    label="Enter list title"
+                    hint="At least 2 characters"
+                    v-model="newListTitle"
+                    min="2"
+                    counter
+                  ></v-text-field>
+                </v-flex>
+              </v-layout>
+                <v-layout row>
+                  <v-btn type="submit" value="Done">Done</v-btn>
+                  <v-btn type="reset" value="Cancel" @click="addListDone()">Cancel</v-btn>
+                </v-layout>
+              </form>
+              <v-btn v-else @click="addingList = true">Add List</v-btn>
+            </div>
+            <v-container fluid>
+            <li v-for="(lis, listIndex) in lists">
+              <ul class="listDisplay hor-list">
+                <v-layout row> 
+                  <v-flex xs4>
+                   <h2>{{lis.ltitle}}</h2>
+                 </v-flex>
+               </v-layout>
+                <div class="add-item">
+                  <form v-if="lis.editing" @submit.prevent="editTitle(lis)">
+                   <v-layout row>
+                      <v-flex xs4>
+                        <v-subheader>Edit List Title</v-subheader>
+                      </v-flex>
+                      <v-flex xs8>
+                        <v-text-field
+                          name="input-10-1"
+                          label="Enter list title"
+                          hint="At least 2 characters"
+                          v-model="editListTitle"
+                          min="2"
+                          counter
+                        ></v-text-field>
+                      </v-flex>
+                    </v-layout>
+                      <v-layout row>
+                        <v-btn type="submit" value="Done">Done</v-btn>
+                        <v-btn type="reset" value="Cancel" @click="editTitleDone(lis)">Cancel</v-btn>
+                      </v-layout>
+                    </form>
+                    <v-btn v-else @click="lis.editing = true">Edit Title</v-btn>
+                  </div>
+                  <v-btn @click="removeList(lis)">Remove List</v-btn>
+                  <v-btn icon @click.native="moveList(lis, -1)">
+                    <v-icon>fast_rewind</v-icon>
+                  </v-btn>
+                  <v-btn icon @click.native="moveList(lis, 1)">
+                    <v-icon>fast_forward</v-icon>
+                  </v-btn>
+                  <v-btn icon @click.native="lis.active=! lis.active">
+                    <v-icon>{{ lis.active ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</v-icon>
+                  </v-btn>
+                  <div v-show="lis.active">
+                    <li v-for="(c, cardIndex) in lis.listCards">
+                      <div v-show="c.show">
+                        <v-card class="card">
+                          <v-card-title primary-title> {{ c.ltitle }} </v-card-title>
+                          <div class="add-item">
+                            <form v-if="c.editing" @submit.prevent="editCardTitle(lis, c, cardIndex)">
+                                <v-layout row>
+                                  <v-flex xs4>
+                                    <v-subheader>Edit Card Title</v-subheader>
+                                  </v-flex>
+                                  <v-flex xs8>
+                                    <v-text-field
+                                    name="input-10-1"
+                                    label="Enter card title"
+                                    v-model="cardTitle"
+                                    min="1"
+                                    counter
+                                    ></v-text-field>
+                                  </v-flex>
+                                </v-layout>
+                                <v-layout row>
+                                  <v-btn type="submit" value="Done" >Done</v-btn>
+                                  <v-btn type="reset" value="Cancel" @click="editCardTitleDone(c)">Cancel</v-btn>
+                                </v-layout>
+                              </form>
+                              <v-btn v-else @click="c.editing = true">Edit Title</v-btn>
+                            </div>
+                            <v-btn icon @click="removeCard(lis, c,  cardIndex)">
+                              <span class="mdi mdi-delete"></span>
+                            </v-btn>
+                            <v-btn icon @click.native="moveCard(lis, c, cardIndex, -1)">
+                              <v-icon>fast_rewind</v-icon>
+                            </v-btn>
+                            <v-btn icon @click.native="moveCard(lis, c, cardIndex, 1)">
+                              <v-icon>fast_forward</v-icon>
+                            </v-btn>
+                            <v-btn icon @click.native="c.active=! c.active ">
+                              <v-icon>{{ c.active ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}</v-icon>
+                            </v-btn>
+                            <v-slide-y-transition>
+                              <v-card-text v-show="c.active">
+                                <v-layout row>
+                                  <div class="label-margin"><b>Created on: </b> {{ c.timestamp }}</div>
+                                </v-layout>
+                                <v-layout row>
+                                  <div class="label-margin"><b>Description: </b> {{ c.description }}</div>
+                                </v-layout>
+                                <v-layout row>
+                                  <div class="label-margin"><b>Deadline: </b> {{ c.deadline }}</div>
+                                </v-layout>
+                                <v-layout row>
+                                  <div class="label-margin"><b>To-do: </b></div>
+                                </v-layout>
+                                <ul v-for="t in c.todo">
+                                  <v-layout row>
+                                    <li class="todo-li">{{t.item}}</li>
+                                  </v-layout>
+                                </ul>
+                                <div class="label-margin"><b>Assigned Users: </b>
+                                  <ul v-for="u in c.users">
+                                    <v-layout row>
+                                      <li>{{u}}</li>
+                                    </v-layout>
+                                  </ul>
+                                </div>
+                                <div class="label-margin"><b>Categories: </b>
+                                  <ul v-for="(cat, index) in c.categories">
+                                    <v-layout row>
+                                      <li :style="{'backgroundColor': cat.color}">{{cat}}</li>
+                                    </v-layout>
+                                  </ul>
+                                </div>
+                                <v-layout row>
+                                  <div class="label-margin"><b>Comments: </b></div>
+                                </v-layout>
+                                <ul v-for="com in c.comments">
+                                  <v-layout row>
+                                    <li class="todo-li">{{com}}</li>
+                                  </v-layout>
+                                </ul>
+                                <div>
+                                  <form v-if="c.addingComment" @submit.prevent="addComment(lis, c, listIndex, cardIndex)">
+                                    <v-layout row>
+                                      <v-flex xs4>
+                                          <v-subheader>Add Comment</v-subheader>
+                                        </v-flex>
+                                        <v-flex xs8>
+                                          <v-text-field
+                                          name="input-10-1"
+                                          label="Add Comment"
+                                          hint="At least 2 characters"
+                                          v-model="comment"
+                                          min="2"
+                                          
+                                          counter
+                                          ></v-text-field>
+                                        </v-flex>
+                                      </v-layout>
+                                      <v-layout row>
+                                        <v-btn type="submit" value="Done">Done</v-btn>
+                                        <v-btn type="reset" value="Cancel" @click="addCommentDone(c)">Cancel</v-btn>
+                                      </v-layout>
+                                    </form>
+                                    <v-btn v-else @click="c.addingComment = true">Add Comment</v-btn>
+                                  </div>
+                                </v-card-text>
+                              </v-slide-y-transition>
+                            </v-card>
+                          </div>
+                       </li>
+                      
+                    
+                        <div class="add-item">
+
+                              <form v-if="lis.adding" @submit.prevent="addCard(lis)">
+                                <v-layout justify-center>
+                                    <v-flex xs12 sm12 md12 lg12>
+                                      <v-card ref="form">
+                                        <v-card-text>
+                                            <v-text-field
+                                              label="Card Title: "
+                                              placeholder="Add title.."
+                                              v-model="cardTitle"
+                                              required
+                                            ></v-text-field>
+                                         
+                                          <v-text-field
+                                            label="Card Description: "
+                                            placeholder="Add description.."
+                                            v-model="cardDescription"
+                                            multi-line
+                                            required
+                                          ></v-text-field>
+                                          <v-text-field
+                                            label="Card Deadline: "
+                                            placeholder="Add deadline.."
+                                            v-model="cardDeadline"
+                                            required
+                                          ></v-text-field>
+                                          <v-text-field
+                                            label="Card To-dos: "
+                                            placeholder="Add to-dos (comma separated).."
+                                            v-model="cardTodo"
+                                            required
+                                          ></v-text-field>
+                                          
+                                          <div v-for="u in users">
+                                            <input type="checkbox" :value="u.name" v-model="selected"> {{ u.name }} </div>
+                                          <p>Categories:</p>
+                                          <div v-for="cat in categories" v-bind:id="cat.label" :style="{'backgroundColor': cat.color}">
+                                            <input type="checkbox" :value="cat.label" v-model="cardCategories"> {{ cat.label }} </div>
+                                        </v-card-text>
+                                        <v-divider class="mt-5"></v-divider>
+                                        <v-card-actions>
+                                          <v-spacer></v-spacer>                                                  
+                                          <v-btn type="reset" value="Cancel" @click="changeInfoDone()">Cancel</v-btn>
+                                          <v-btn type="submit" value="Done">Done</v-btn>
+                                        </v-card-actions>
+                                      </v-card>
+                                    </v-flex>
+                                  </v-layout>
+                                </form>
+                              <v-btn v-else @click="lis.adding = true">Add Card</v-btn>
+                            </div>
+                          </div>
+                        </ul>
+                      </li>
+              </v-container>
+
+            <v-container>
+
+            </v-container>
+          </ul>
+
+          </v-content>
+          <v-footer class="blue darken-2">
+            <v-layout row wrap align-center>
+              <v-flex xs12>
+                <div class="white--text ml-3">
+                  Made with
+                  <v-icon class="red--text">favorite</v-icon>
+                  by  <a class="white--text" href="https://github.com/prathmeshpatel">Prath Patel</a>
+                </div>
+              </v-flex>
+            </v-layout>
+          </v-footer>
+      </div>
+    </v-app>
+  </div>
+
+  <template id='change-template'>
+    <!-- <div>
+      <h1>Change User Info</h1>
+      <form v-if="changingInfo" @submit.prevent="changeInfo()">
+      <v-layout row>
+        <label for="changeName">New Name: </label>
+        <input class="input-margin" type="text" id="changeName" v-model="changeName" /> </v-layout>
+        <v-layout row>
+          <label for="changeEmail">New Email: </label>
+          <input class="input-margin" type="text" id="changeEmail" v-model="changeEmail" /> </v-layout>
+          <v-layout row>
+            <v-btn type="submit" value="Done">Done</v-btn>
+            <v-btn type="reset" value="Cancel" @click="changeInfoDone()">Cancel</v-btn>
+          </v-layout>
+        </form>
+        <v-btn v-else @click="changingInfo = true">Change User Info</v-btn>
+      </div> -->
+    </template>
+ <script src="js/prello.js"></script>
+</body>
+</html>
